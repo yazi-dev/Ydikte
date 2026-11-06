@@ -1,0 +1,7 @@
+.env
+config.toml
+whisper/
+ydikte.log*
+__pycache__/
+YDikte.lnk
+*.tmp

@@ -1,0 +1,98 @@
+# YDikte settings. Changes apply automatically within a couple of seconds.
+# API keys do not go here, they go in .env.
+
+# ---------------------------------------------------------------------------
+# Hotkey. Hold to talk, double-tap for hands-free, Esc to cancel.
+#
+# Single key:  "rctrl"  "f13"  "capslock"  "scrolllock"  "pause"  "apps"
+# Combination: "ctrl+win"  "ctrl+shift+space"  "alt+f9"
+# Modifiers:   ctrl lctrl rctrl  shift lshift rshift  alt lalt ralt  win lwin rwin
+# Raw codes:   "vk:0x7C"  "sc:0x5D"  (find them with: python ydikte.pyw --keytest)
+#
+# The Fn key: on most laptops Fn is handled by the keyboard firmware and Windows
+# never sees it. Run --keytest and press Fn. If it prints a line, use that code.
+#
+# Avoid "ralt" on a Turkish keyboard, it is AltGr (the @ key needs it).
+# ---------------------------------------------------------------------------
+hotkey = "rctrl"
+
+[timing]
+hold_threshold_ms = 200     # a press shorter than this counts as a tap
+double_tap_ms = 350         # max gap between the two taps of a double-tap
+shortcut_guard_ms = 800     # another key this soon after the hotkey means "it was a shortcut"
+max_recording_secs = 300    # recording stops by itself after this long
+
+[transcription]
+# "local"  whisper.cpp on this PC. Offline, audio never leaves the machine.
+# "groq"   Groq Whisper API (needs GROQ_API_KEY in .env)
+# "openai" OpenAI Whisper API (needs OPENAI_API_KEY in .env)
+# "auto"   Groq if it has a key, then OpenAI if it has a key, otherwise local
+backend = "local"
+
+# "auto" detects per recording. Set "tr" or "en" if short clips get misdetected.
+language = "auto"
+
+# If a cloud API fails (offline, bad key), try the local model instead.
+fallback_to_local = true
+
+[transcription.local]
+exe = "whisper/bin/whisper-cli.exe"
+model = "whisper/models/ggml-small.bin"
+gpu = true        # used only if the GPU build is installed (install.py --gpu)
+threads = 0       # 0 = half of the logical CPUs
+
+[transcription.groq]
+model = "whisper-large-v3-turbo"
+base_url = "https://api.groq.com/openai/v1"
+
+[transcription.openai]
+model = "whisper-1"
+base_url = "https://api.openai.com/v1"
+
+[llm]
+# "auto" uses the first of OpenRouter, OpenAI, Groq that has a key in .env.
+# "custom" talks to any OpenAI-compatible server, e.g. a local Ollama:
+#     provider = "custom", base_url = "http://localhost:11434/v1", model = "llama3.2"
+# "none" skips cleanup and inserts the raw transcript.
+# With no key, or when offline, the raw transcript is inserted.
+provider = "auto"
+
+# Leave empty for the provider's default below.
+model = ""
+base_url = ""
+timeout_secs = 10
+
+openrouter_model = "openai/gpt-4o-mini"
+openai_model = "gpt-4o-mini"
+groq_model = "llama-3.1-8b-instant"
+
+# Leave empty to use the built-in cleanup prompt.
+system_prompt = ""
+
+[app]
+# Windows blocks normal programs from elevated (Run as administrator) windows,
+# both seeing their keys and sending keys to them. If you work in an elevated
+# terminal, turn this on: YDikte then asks for consent (UAC) each time it starts.
+run_as_admin = false
+
+[insert]
+# "auto"  paste with Ctrl+V, except in terminals, where the text is typed instead:
+#         in a raw-mode console app Ctrl+V reaches the app as a control character
+#         and pastes nothing.
+# "paste" always paste. "type" always type.
+method = "auto"
+
+# false: the transcript stays on the clipboard so you can paste it again.
+# true:  your previous clipboard comes back after the paste.
+restore_clipboard = false
+
+# Add a space after the text so consecutive dictations do not run together.
+trailing_space = true
+
+[audio]
+# Part of the microphone's name. Empty = the Windows default microphone.
+# See the names with: python ydikte.pyw --mic-test
+input_device = ""
+
+[ui]
+pill = true
